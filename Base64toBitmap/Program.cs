@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 
 namespace Base64toBitmap
 {
@@ -12,48 +13,46 @@ namespace Base64toBitmap
         {
             Bitmap finalBitmap = new Bitmap(800, 1066);
             string txtFolder = @"C:\Users\danii\source\repos\Base64toBitmap\Base64toBitmap\txt\";
+            string imagesFolder = @"C:\Users\danii\source\repos\Base64toBitmap\Base64toBitmap\images\";
 
             DirectoryInfo d = new DirectoryInfo(txtFolder);//Assuming Test is your Folder
-            FileInfo[] Files = d.GetFiles("*.txt"); //Getting Text files
+            List<FileInfo> Files = d.GetFiles("*.txt")
+                                    .OrderBy(f => f.Length)
+                                    .ToList(); //Getting Text files
 
-            List<string> fileNames = new List<string>();
+            //fileNames = fileNames.OrderBy(a => Guid.NewGuid()).ToList();
+            //fileNames.Sort();
+
+            int widthPx = 0;
+            int sum = 400;
+            int koef = -1;
             foreach (FileInfo file in Files)
-            {
-                fileNames.Add(file.Name);
-            }
-
-            fileNames.Sort();
-
-            int i = 0;
-            foreach (string fileName in fileNames)
             {
                 try
                 {
-                    string path = txtFolder + fileName;
+                    string path = txtFolder + file.Name;
                     string ImageText = File.ReadAllText(path);
                     Byte[] bitmapData = Convert.FromBase64String(FixBase64ForImage(ImageText));
                     MemoryStream streamBitmap = new MemoryStream(bitmapData);
                     Bitmap bitImage = new Bitmap((Bitmap)Image.FromStream(streamBitmap));
 
                     Graphics gr = Graphics.FromImage(finalBitmap);
-                    gr.DrawImage(bitImage, i++, 0);
+
+                    var pos = widthPx;
+                    //pos = 400 + koef * sum + -koef * widthPx;
+
+                    gr.DrawImage(bitImage, pos, 0);
+                    koef *= -1;
+                    widthPx++;
                 }
                 catch
                 {
+                    Console.WriteLine(file.Name);
                     continue;
                 }
             }
 
-            //string path1 = @"C:\Users\danii\source\repos\Base64toBitmap\Base64toBitmap\txt\00059d52cee54eaea00a8c3c3167e231.txt";
-            //string ImageText1 = File.ReadAllText(path1);
-            //Byte[] bitmapData1 = Convert.FromBase64String(FixBase64ForImage(ImageText1));
-            //MemoryStream streamBitmap = new MemoryStream(bitmapData1);
-            //Bitmap bitImage1 = new Bitmap((Bitmap)Image.FromStream(streamBitmap));
-
-            //Graphics gr = Graphics.FromImage(finalBitmap);
-            //gr.DrawImage(bitImage1, 0, 0);
-
-            finalBitmap.Save(@"C:\Users\danii\source\repos\Base64toBitmap\Base64toBitmap\images\image.jpeg", ImageFormat.Jpeg);
+            finalBitmap.Save($"{imagesFolder}image.png", ImageFormat.Png);
         }
 
         static string FixBase64ForImage(string Image)
