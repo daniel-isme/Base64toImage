@@ -12,8 +12,9 @@ namespace Base64toBitmap
         static void Main(string[] args)
         {
             Bitmap finalBitmap = new Bitmap(800, 1066);
-            string txtFolder = @"C:\Users\danii\source\repos\Base64toBitmap\Base64toBitmap\txt\";
-            string imagesFolder = @"C:\Users\danii\source\repos\Base64toBitmap\Base64toBitmap\images\";
+            string workingDirectory = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "..\\..\\..\\"));
+            string txtFolder = workingDirectory + @"txt\";
+            string imagesFolder = workingDirectory + @"images\";
 
             DirectoryInfo d = new DirectoryInfo(txtFolder);//Assuming Test is your Folder
             List<FileInfo> Files = d.GetFiles("*.txt")
